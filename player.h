@@ -40,5 +40,6 @@ struct player {
 };
 
 BOOLEAN player_init(struct player *, const char *, struct game *);
+
 enum move_result player_turn(struct player *);
 #endif

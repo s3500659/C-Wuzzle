@@ -19,7 +19,8 @@ char *color_strings[] = {"\033[0;31m", "\033[0;32m", "\033[0;33m", "\033[0;34m",
  * with. Also assign the game pointer so we can access it later.
  **/
 BOOLEAN player_init(struct player *theplayer, const char *name,
-                    struct game *thegame) {
+                    struct game *thegame)
+{
     return FALSE;
 }
 
