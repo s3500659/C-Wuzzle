@@ -40,6 +40,10 @@ struct player {
 };
 
 BOOLEAN player_init(struct player *, const char *, struct game *);
+BOOLEAN get_player_name(struct player *player);
+int gen_randomnumber(int max);
+enum color get_playercolour(int colournumber);
+BOOLEAN validate_player_colour(struct player *p1, struct player *p2);
 
 enum move_result player_turn(struct player *);
 #endif

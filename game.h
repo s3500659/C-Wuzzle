@@ -8,18 +8,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <string.h>
+#include <assert.h>
 
 #include "board.h"
 #include "player.h"
+#include "score_list.h"
+#include "player.h"
+#include "io.h"
 
 #ifndef GAME_H
 #define GAME_H
 #define MAX_PLAYERS 2
 #define MAXRAND 6
-#define EXTRACHARS 2
+
 #define PLAYERONE 1
 #define PLAYERTWO 2
+#define COINFLIP 2
 
 struct game
 {
@@ -32,17 +36,13 @@ struct game
 BOOLEAN game_init(struct game *);
 void play_game(const char *);
 
-int gen_randomnumber(int max);
-enum color get_playercolour(int colournumber);
 
-enum input_result
-{
-    IR_FAILURE,
-    IR_SUCCESS,
-    IR_EOF = -1
-};
 
-enum input_result get_user_input(char *str, int buffer_len);
-void clear_buffer(void);
+BOOLEAN get_board_size(int *width, int *height);
+int flip_coin();
+
+
+
+
 
 #endif

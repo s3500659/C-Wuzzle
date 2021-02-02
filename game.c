@@ -15,44 +15,53 @@ BOOLEAN game_init(struct game *thegame)
 {
     struct player playerone;
     struct player playertwo;
-    enum input_result inputresult;
-    int random_number;
+    char playerone_name[NAMELEN + EXTRACHARS];
+    char playertwo_name[NAMELEN + EXTRACHARS];
 
-    srand(time(NULL));
+    int width, height;
+    struct board *newboard = (struct board *)malloc(sizeof(struct board));
+    int coinflip_result;
 
-    /* get player one name */
-    printf("\nPlease enter name for player one\n");
-    inputresult = get_user_input(playerone.name, NAMELEN);
-    if (inputresult != IR_SUCCESS)
+    /* init player one */
+    player_init(&playerone, playerone_name, thegame);
+    /* init player two */
+    player_init(&playertwo, playertwo_name, thegame);
+    /* ensure players have are different colours */
+    if (!validate_player_colour(&playerone, &playertwo))
+    {
+        fprintf(stderr, "Error: players cannot have the same colour\n");
+        return FALSE;
+    }
+    /* prompt for board size */
+    if (!get_board_size(&width, &height))
     {
         return FALSE;
     }
-    /* assign colour */
-    random_number = gen_randomnumber(MAXRAND);
-    playerone.color = get_playercolour(random_number);
+    /* initialise the board */
+    newboard = new_board(width, height);
+    /* who goes first? */
+    coinflip_result = flip_coin();
 
-    /* get player two name*/
-    printf("\nPlease enter name for player two\n");
-    inputresult = get_user_input(playertwo.name, NAMELEN);
-    if (inputresult != IR_SUCCESS)
-    {
-        return FALSE;
-    }
-    /* assign colour */
-    random_number = gen_randomnumber(MAXRAND);
-    playertwo.color = get_playercolour(random_number);
-
-    /* ensure colour are different */
-    while (playerone.color == playertwo.color)
-    {
-        random_number = gen_randomnumber(MAXRAND);
-        playertwo.color = get_playercolour(random_number);
-    }
-
-    printf("player one name is %s and colour is %d\n", playerone.name, playerone.color);
-    printf("player two name is %s and colour is %d\n", playertwo.name, playertwo.color);
+    thegame->players[PLAYERONE - 1] = playerone;
+    thegame->players[PLAYERTWO - 1] = playertwo;
+    thegame->theboard = newboard;
+    thegame->curr_player_num = coinflip_result;
 
     return TRUE;
+}
+
+/* flips a coin, result should only be either 0 or 1 */
+int flip_coin()
+{
+    int result = EOF;
+
+    srand(time(NULL));
+    result = gen_randomnumber(COINFLIP);
+    printf("flip_coin = %d\n", result);
+
+    assert(result > EOF || result < COINFLIP);
+
+    return result;
 }
 
 /**
@@ -64,86 +73,7 @@ BOOLEAN game_init(struct game *thegame)
  **/
 void play_game(const char *scoresfile)
 {
-    struct game thegame;
-
-    game_init(&thegame);
-}
-
-enum color get_playercolour(int colournumber)
-{
-    switch (colournumber)
-    {
-    case 0:
-        return COL_RED;
-        break;
-    case 1:
-        return COL_GREEN;
-        break;
-    case 2:
-        return COL_YELLOW;
-        break;
-    case 3:
-        return COL_BLUE;
-        break;
-    case 4:
-        return COL_MAGENTA;
-        break;
-    case 5:
-        return COL_CYAN;
-        break;
-    default:
-        return COL_RESET;
-        break;
-    }
-}
-
-int gen_randomnumber(int max)
-{
-    int random_number = RAND_MAX;
-
-    if (random_number > MAXRAND)
-    {
-        random_number = rand() % MAXRAND;
-    }
-
-    return random_number;
-}
-
-enum input_result get_user_input(char *str, int buffer_len)
-{
-    int len = 0;
-
-    if (fgets(str, buffer_len + EXTRACHARS, stdin) == NULL)
-    {
-        fprintf(stderr, "EOF detected\n");
-        return IR_EOF;
-    }
-
-    if (str[0] == '\n')
-    {
-        fprintf(stderr, "No user input detected\n");
-        return IR_FAILURE;
-    }
-
-    len = strlen(str);
-    if (str[len - 1] != '\n')
-    {
-        fprintf(stderr, "Too many input causing buffer overflow\n");
-        clear_buffer();
-        return IR_FAILURE;
-    }
-    else
-    {
-        str[len - 1] = '\0';
-    }
-
-    return IR_SUCCESS;
-}
-
-void clear_buffer(void)
-{
-    int ch;
-    while (ch = getc(stdin), ch != EOF && ch != '\n')
-        ;
-    clearerr(stdin);
+    struct game *thegame = malloc(sizeof(struct game));
+    game_init(thegame);
+    load_scores(scoresfile);
 }

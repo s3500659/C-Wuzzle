@@ -37,6 +37,7 @@ BOOLEAN read_scorelist(FILE *reader, char *array)
     while (fgets(line, LINELEN + EXTRACHARS, reader) != NULL) {
         
         strcat(array, line);
+        printf("%s",line);
     }
 
     return TRUE;

@@ -5,6 +5,11 @@
  * Startup code provided by Paul Miller for use in "Programming in C",
  * Assignment 2, study period 4, 2020.
  *****************************************************************************/
+#include <string.h>
+#include <stdio.h>
+#include <ctype.h>
+#include "shared.h"
+
 #ifndef SCORE_LIST_H
 #define SCORE_LIST_H
 /**
@@ -27,4 +32,8 @@ struct score_list {
 
 struct score_list *load_scores(const char *);
 void deal_letters(struct score_list *, struct score_list *);
+char *strdup(const char *orig);
+BOOLEAN check_comma_format(char *token);
+BOOLEAN init_scorelist(struct score_list *scorelist);
+void print_scorelist(struct score_list *newscorelist);
 #endif
