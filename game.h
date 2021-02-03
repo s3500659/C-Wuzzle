@@ -11,10 +11,11 @@
 #include <assert.h>
 
 #include "board.h"
-#include "player.h"
 #include "score_list.h"
-#include "player.h"
 #include "io.h"
+#include "rules-b.h"
+#include "player.h"
+#include "shared.h"
 
 #ifndef GAME_H
 #define GAME_H
@@ -35,9 +36,6 @@ struct game
 
 BOOLEAN game_init(struct game *);
 void play_game(const char *);
-
-
-
 BOOLEAN get_board_size(int *width, int *height);
 int flip_coin();
 

@@ -7,10 +7,13 @@
  *****************************************************************************/
 #include "shared.h"
 #include "rules-b.h"
+#include "io.h"
+
 #ifndef PLAYER_H
 #define PLAYER_H
 /* the maximum length of a player's name */
 #define NAMELEN 40
+
 
 /**
  * enumeration that defines the colours that can be used for players
@@ -47,4 +50,6 @@ BOOLEAN validate_player_colour(struct player *p1, struct player *p2);
 void print_board(struct player *theplayer);
 char *get_color_name(enum color col);
 enum move_result player_turn(struct player *theplayer);
+void print_player_hand(struct player *theplayer);
+enum input_result get_new_word(struct player *theplayer, char *new_word);
 #endif

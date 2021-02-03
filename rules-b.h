@@ -6,6 +6,9 @@
  * Assignment 2, study period 4, 2020.
  *****************************************************************************/
 #include "shared.h"
+
+#define MAXLETTER 5
+
 #ifndef RULES_B_H
 #define RULES_B_H
 struct player;
