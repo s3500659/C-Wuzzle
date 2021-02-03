@@ -100,9 +100,7 @@ struct score_list *load_scores(const char *filename)
         comma_count = 0;
     }
 
-    print_scorelist(newscorelist);
-
-    return NULL;
+    return newscorelist;
 }
 
 void print_scorelist(struct score_list *newscorelist)
@@ -121,9 +119,9 @@ BOOLEAN init_scorelist(struct score_list *scorelist)
     {
         return FALSE;
     }
-    scorelist = (struct score_list *)malloc(sizeof(struct score_list));
     scorelist->num_scores = 0;
     scorelist->total_count = 0;
+    memset(scorelist->scores, 0, MAXTOKENS * sizeof(struct score));
     return TRUE;
 }
 
@@ -159,7 +157,67 @@ BOOLEAN check_comma_format(char *token)
  *five letters at the end.
  **/
 void deal_letters(struct score_list *score_list,
-                  struct score_list *player_hand) {}
+                  struct score_list *player_hand)
+{
+    int count = 0;
+
+    init_scorelist(player_hand);
+    /* put 5 letters from score_list into player_hand */
+    srand(time(NULL));
+    while (player_hand->total_count < MAXHAND)
+    {
+        int randomnumber = 0;
+        randomnumber = gen_randomnumber(MAXTOKENS);
+        printf("random number = %d\n", randomnumber);
+        if (score_list->total_count > 0 && score_list->scores[randomnumber].count > 0)
+        {
+            int i = check_letter_exist(player_hand, score_list, count, randomnumber);
+            if (i != EOF)
+            {
+                player_hand->scores[i].count++;
+                player_hand->total_count++;
+            }
+            else
+            {
+                /* increase player hand */
+                player_hand->scores[count].letter = score_list->scores[randomnumber].letter;
+                player_hand->scores[count].score = score_list->scores[randomnumber].score;
+                player_hand->scores[count].count++;
+                player_hand->total_count++;
+                count++;
+            }
+
+            if (player_hand->scores[count].count > 0)
+            {
+                player_hand->num_scores++;
+            }
+
+            /* decrease score_list */
+            score_list->total_count--;
+            score_list->scores[randomnumber].count--;
+            if (score_list->scores[randomnumber].count == 0)
+            {
+                score_list->num_scores--;
+            }
+        }
+    }
+    print_scorelist(player_hand);
+}
+
+/* check whether the letter already exists in players hand */
+int check_letter_exist(struct score_list *player_hand, struct score_list *score_list, int count, int randomnumber)
+{
+    int i;
+
+    for (i = 0; i < count; i++)
+    {
+        if (player_hand->scores[i].letter == score_list->scores[randomnumber].letter)
+        {
+            return i;
+        }
+    }
+    return EOF;
+}
 
 /**
  * a convenience function we provide to you to make it easier to copy strings.

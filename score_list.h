@@ -24,6 +24,7 @@ struct score {
  * 'deck' from which letters are dealt. This is also the structure used by each
  * player to represent their hand.
  **/
+#define MAXHAND 5
 struct score_list {
     struct score scores[NUM_SCORES];
     int num_scores;
@@ -36,4 +37,5 @@ char *strdup(const char *orig);
 BOOLEAN check_comma_format(char *token);
 BOOLEAN init_scorelist(struct score_list *scorelist);
 void print_scorelist(struct score_list *newscorelist);
+int check_letter_exist(struct score_list *player_hand, struct score_list *score_list, int count, int randomnumber);
 #endif

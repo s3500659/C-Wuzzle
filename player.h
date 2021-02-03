@@ -44,6 +44,7 @@ BOOLEAN get_player_name(struct player *player);
 int gen_randomnumber(int max);
 enum color get_playercolour(int colournumber);
 BOOLEAN validate_player_colour(struct player *p1, struct player *p2);
-
-enum move_result player_turn(struct player *);
+void print_board(struct player *theplayer);
+char *get_color_name(enum color col);
+enum move_result player_turn(struct player *theplayer);
 #endif

@@ -74,6 +74,15 @@ int flip_coin()
 void play_game(const char *scoresfile)
 {
     struct game *thegame = malloc(sizeof(struct game));
+    struct score_list *scorelist;
+    enum move_result moveresult;
+
     game_init(thegame);
-    load_scores(scoresfile);
+    scorelist = load_scores(scoresfile);
+    /* deal for player 1 */
+    deal_letters(scorelist, thegame->players[PLAYERONE - 1].hand);
+    /* deal for player 2 */
+    deal_letters(scorelist, thegame->players[PLAYERTWO - 1].hand);
+    /* whos turn is it? */
+    moveresult = player_turn(&thegame->players[thegame->curr_player_num]);
 }
