@@ -9,6 +9,14 @@
 #include <time.h>
 
 #define BASE10 10
+#define MAXLETTER 5
+#define MAXLOCATIONLEN 3
+#define ORIENTATIONLEN 1
+#define MAX_PLAYERS 2
+#define MAXRAND 6
+#define PLAYERONE 0
+#define PLAYERTWO 1
+#define COINFLIP 2
 
 #ifndef SHARED_H
 #define SHARED_H

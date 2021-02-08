@@ -44,13 +44,11 @@ enum input_result get_user_input(char *str, int buffer_len)
 
     if (fgets(str, buffer_len + EXTRACHARS, stdin) == NULL)
     {
-        fprintf(stderr, "Error: EOF detected\n");
         return IR_EOF;
     }
 
     if (str[0] == '\n')
     {
-        fprintf(stderr, "Error: No user input detected\n");
         return IR_FAILURE;
     }
 

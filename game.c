@@ -6,6 +6,10 @@
  * Assignment 2, study period 4, 2020.
  *****************************************************************************/
 #include "game.h"
+#include "rules-b.h"
+#include "score_list.h"
+#include "board.h"
+
 
 /**
  * initialise the game. Please see the assignment specification for details of
@@ -22,10 +26,21 @@ BOOLEAN game_init(struct game *thegame)
     struct board *newboard = (struct board *)malloc(sizeof(struct board));
     int coinflip_result;
 
+    if (!newboard)
+    {
+        perror("Error: malloc failed when allocating for new board inside game_init()\n");
+    }
+
     /* init player one */
-    player_init(&playerone, playerone_name, thegame);
+    if (!player_init(&playerone, playerone_name, thegame))
+    {
+        return FALSE;
+    }
     /* init player two */
-    player_init(&playertwo, playertwo_name, thegame);
+    if (!player_init(&playertwo, playertwo_name, thegame))
+    {
+        return FALSE;
+    }
     /* ensure players have are different colours */
     if (!validate_player_colour(&playerone, &playertwo))
     {
@@ -42,8 +57,8 @@ BOOLEAN game_init(struct game *thegame)
     /* who goes first? */
     coinflip_result = flip_coin();
 
-    thegame->players[PLAYERONE - 1] = playerone;
-    thegame->players[PLAYERTWO - 1] = playertwo;
+    thegame->players[PLAYERONE] = playerone;
+    thegame->players[PLAYERTWO] = playertwo;
     thegame->theboard = newboard;
     thegame->curr_player_num = coinflip_result;
 
@@ -57,8 +72,6 @@ int flip_coin()
 
     srand(time(NULL));
     result = gen_randomnumber(COINFLIP);
-    printf("flip_coin = %d\n", result);
-
     assert(result > EOF || result < COINFLIP);
 
     return result;
@@ -76,13 +89,87 @@ void play_game(const char *scoresfile)
     struct game *thegame = malloc(sizeof(struct game));
     struct score_list *scorelist;
     enum move_result moveresult;
+    int currentplayer = thegame->curr_player_num;
+
+    if (!thegame)
+    {
+        perror("Error: malloc failed when allocating for struct game inside play_game()\n");
+    }
 
     game_init(thegame);
     scorelist = load_scores(scoresfile);
-    /* deal for player 1 */
-    deal_letters(scorelist, thegame->players[PLAYERONE - 1].hand);
-    /* deal for player 2 */
-    deal_letters(scorelist, thegame->players[PLAYERTWO - 1].hand);
-    /* whos turn is it? */
-    moveresult = player_turn(&thegame->players[thegame->curr_player_num]);
+
+    while (scorelist->total_count > 0)
+    {
+        if (thegame->players[PLAYERONE].hand->total_count < MAXLETTER)
+        {
+            /* deal for player 1 */
+            deal_letters(scorelist, thegame->players[PLAYERONE].hand);
+        }
+        if (thegame->players[PLAYERTWO].hand->total_count < MAXLETTER)
+        {
+            /* deal for player 2 */
+            deal_letters(scorelist, thegame->players[PLAYERTWO].hand);
+        }
+        /* player one's turn */
+        if (currentplayer == PLAYERONE)
+        {
+            moveresult = player_turn(&thegame->players[PLAYERONE]);
+            if (moveresult == MOVE_QUIT)
+            {
+                declare_winner(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO]);
+                free_memory(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO], thegame, scorelist);
+                exit(EXIT_SUCCESS);
+            }
+            
+            currentplayer = PLAYERTWO;
+        }
+        /* player two's turn */
+        else
+        {
+            moveresult = player_turn(&thegame->players[PLAYERTWO]);
+            if (moveresult == MOVE_QUIT)
+            {
+                declare_winner(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO]);
+                free_memory(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO], thegame, scorelist);
+                exit(EXIT_SUCCESS);
+            }
+
+            currentplayer = PLAYERONE;
+        }
+    }
+}
+
+/* free memory */
+void free_memory(struct player *p1, struct player *p2, struct game *thegame, struct score_list *scorelist)
+{
+    int i;
+
+    for (i = 0; i < thegame->theboard->height; i++)
+    {
+        free(thegame->theboard->matrix[i]);
+    }
+    free(thegame->theboard->matrix);
+    free(p1->hand);
+    free(p1),
+    free(p2->hand);
+    free(p2);
+    free(scorelist);
+    
+}
+
+void declare_winner(struct player *p1, struct player *p2)
+{
+    if (p1->score > p2->score)
+    {
+        printf("%s is the winner with %d points!\n", p1->name, p1->score);
+    }
+    else if(p1->score < p2->score)
+    {
+        printf("%s is the winner with %d points!\n", p2->name, p2->score);
+    }
+    else 
+    {
+        printf("It's a draw!\n");
+    }
 }

@@ -10,21 +10,14 @@
 #include <time.h>
 #include <assert.h>
 
-#include "board.h"
-#include "score_list.h"
-#include "io.h"
-#include "rules-b.h"
-#include "player.h"
-#include "shared.h"
+
 
 #ifndef GAME_H
 #define GAME_H
-#define MAX_PLAYERS 2
-#define MAXRAND 6
 
-#define PLAYERONE 1
-#define PLAYERTWO 2
-#define COINFLIP 2
+#include "shared.h"
+#include "player.h"
+
 
 struct game
 {
@@ -38,6 +31,8 @@ BOOLEAN game_init(struct game *);
 void play_game(const char *);
 BOOLEAN get_board_size(int *width, int *height);
 int flip_coin();
+void declare_winner(struct player *p1, struct player *p2);
+void free_memory(struct player *p1, struct player *p2, struct game *thegame, struct score_list *scorelist);
 
 
 

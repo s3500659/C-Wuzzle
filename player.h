@@ -5,12 +5,12 @@
  * Startup code provided by Paul Miller for use in "Programming in C",
  * Assignment 2, study period 4, 2020.
  *****************************************************************************/
-#include "shared.h"
+#ifndef PLAYER_H
+#define PLAYER_H
+
 #include "rules-b.h"
 #include "io.h"
 
-#ifndef PLAYER_H
-#define PLAYER_H
 /* the maximum length of a player's name */
 #define NAMELEN 40
 
@@ -52,4 +52,6 @@ char *get_color_name(enum color col);
 enum move_result player_turn(struct player *theplayer);
 void print_player_hand(struct player *theplayer);
 enum input_result get_new_word(struct player *theplayer, char *new_word);
+enum input_result get_word_location(char *new_location);
+enum input_result get_orientation(char *ori);
 #endif

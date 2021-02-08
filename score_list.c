@@ -28,6 +28,11 @@ struct score_list *load_scores(const char *filename)
     char *end;
     int scorelist_count = 0;
 
+    if (newscorelist == NULL)
+    {
+        perror("Error: malloc failed for load_scores()");
+    }
+
     /* get the first token */
     token = strtok(scorelist, DELIM);
     /* get other tokens */
@@ -168,7 +173,6 @@ void deal_letters(struct score_list *score_list,
     {
         int randomnumber = 0;
         randomnumber = gen_randomnumber(MAXTOKENS);
-        printf("random number = %d\n", randomnumber);
         if (score_list->total_count > 0 && score_list->scores[randomnumber].count > 0)
         {
             int i = check_letter_exist(player_hand, score_list, count, randomnumber);
@@ -184,13 +188,13 @@ void deal_letters(struct score_list *score_list,
                 player_hand->scores[count].score = score_list->scores[randomnumber].score;
                 player_hand->scores[count].count++;
                 player_hand->total_count++;
-                count++;
             }
 
             if (player_hand->scores[count].count > 0)
             {
                 player_hand->num_scores++;
             }
+            count++;
 
             /* decrease score_list */
             score_list->total_count--;
@@ -201,7 +205,6 @@ void deal_letters(struct score_list *score_list,
             }
         }
     }
-    print_scorelist(player_hand);
 }
 
 /* check whether the letter already exists in players hand */

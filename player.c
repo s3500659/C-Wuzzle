@@ -6,8 +6,11 @@
  * Assignment 2, study period 4, 2020.
  *****************************************************************************/
 #include "player.h"
-
+#include "rules-b.h"
 #include "game.h"
+#include "board.h"
+#include "score_list.h"
+
 /* the color_strings array that defines the color codes for the printing
  * out colour in the terminal. The order of the values in this array is the
  * same as the color enum
@@ -31,6 +34,10 @@ BOOLEAN player_init(struct player *theplayer, const char *name,
     }
 
     theplayer->hand = (struct score_list *)malloc(sizeof(struct score_list));
+    if (!theplayer->hand)
+    {
+        perror("Error: malloc failed when allocating for theplayer->hand inside player_init()\n");
+    }
     /* assign colour */
     random_number = gen_randomnumber(MAXRAND);
     theplayer->color = get_playercolour(random_number);
@@ -95,9 +102,6 @@ BOOLEAN validate_player_colour(struct player *p1, struct player *p2)
     }
     assert(p1->color != p2->color);
 
-    /* delete this */
-    printf("colour: p1=%d, p2=%d\n", p1->color, p2->color);
-
     return TRUE;
 }
 
@@ -108,12 +112,24 @@ BOOLEAN validate_player_colour(struct player *p1, struct player *p2)
 enum move_result player_turn(struct player *theplayer)
 {
     char new_word[MAXLETTER + EXTRACHARS] = "";
+    char new_location[MAXLOCATIONLEN + EXTRACHARS] = "";
+    char new_orientation[ORIENTATIONLEN + EXTRACHARS] = "";
     enum input_result result;
+    struct coord *coords = malloc(sizeof(struct coord));
+    enum orientation orient;
+    char *token, *end;
+
+    if (!coords)
+    {
+        perror("Error: malloc failed when allocating for struct coord inside player_turn()\n");
+    }
 
     print_board(theplayer);
     printf("it is %s's turn and their colour is %s%s%s, and their score is %d.\n", theplayer->name,
            color_strings[theplayer->color], get_color_name(theplayer->color), color_strings[COL_RESET], theplayer->score);
     print_player_hand(theplayer);
+    /* end the game? */
+    printf("To end the game please input cltr+d\n");
     /* get new word from player */
     result = get_new_word(theplayer, new_word);
     if (IR_EOF == result)
@@ -124,10 +140,67 @@ enum move_result player_turn(struct player *theplayer)
     {
         return MOVE_SKIP;
     }
+    /* get coordinates for the word */
+    result = get_word_location(new_location);
+    if (IR_EOF == result)
+    {
+        return MOVE_QUIT;
+    }
+    if (IR_FAILURE == result)
+    {
+        return MOVE_SKIP;
+    }
+    /* get orientation */
+    result = get_orientation(new_orientation);
+    if (IR_EOF == result)
+    {
+        return MOVE_QUIT;
+    }
+    if (IR_FAILURE == result)
+    {
+        return MOVE_SKIP;
+    }
+    /* convert coord string to struct */
+    token = strtok(new_location, ",");
+    coords->x = (int)strtol(token, &end, BASE10);
+    token = strtok(NULL, ",");
+    coords->y = (int)strtol(token, &end, BASE10);
 
-    return MOVE_QUIT;
+    /* convert orient string to enum */
+    if (strcmp(new_orientation, "h") == 0)
+    {
+        orient = HORIZ;
+    }
+    else
+    {
+        orient = VERT;
+    }
+    validate_move(theplayer, new_word, coords, orient);
+
+    return MOVE_SUCCESS;
 }
 
+/* get the orientation for the new word */
+enum input_result get_orientation(char *ori)
+{
+    enum input_result result;
+    printf("Please enter orientation for the world - h for horizontal and v for vertical:\n");
+    result = get_user_input(ori, ORIENTATIONLEN + EXTRACHARS);
+
+    return result;
+}
+
+/* get location for new word */
+enum input_result get_word_location(char *new_location)
+{
+    enum input_result result;
+    printf("Please enter the new location of this wordd (x,y):\n");
+    result = get_user_input(new_location, MAXLOCATIONLEN + EXTRACHARS);
+
+    return result;
+}
+
+/* get a new word from player */
 enum input_result get_new_word(struct player *theplayer, char *new_word)
 {
     enum input_result result;
@@ -185,13 +258,15 @@ void print_board(struct player *theplayer)
         for (j = 0; j < theplayer->curgame->theboard->width; j++)
         {
             int letter = theplayer->curgame->theboard->matrix[i][j].letter;
-            if (letter == EOF)
+            if (letter == EOF || letter == 0)
             {
                 printf("     |");
             }
             else
             {
-                printf("%d  |  ", letter);
+
+                printf("  %s%c%s  |", color_strings[theplayer->curgame->theboard->matrix[i][j].owner->color],
+                       letter, color_strings[COL_RESET]);
             }
         }
         printf("\n%s\n", dash);

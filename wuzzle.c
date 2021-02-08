@@ -10,6 +10,7 @@
 #include <string.h>
 #include <assert.h>
 #include "game.h"
+#include "shared.h"
 
 #define REQUIRED_ARGS 2
 #define FILEARG 1
@@ -37,7 +38,6 @@ BOOLEAN read_scorelist(FILE *reader, char *array)
     while (fgets(line, LINELEN + EXTRACHARS, reader) != NULL) {
         
         strcat(array, line);
-        printf("%s",line);
     }
 
     return TRUE;

@@ -20,12 +20,25 @@ struct board *new_board(int width, int height)
     newboard->width = width;
     newboard->height = height;
 
+    if (!newboard)
+    {
+        perror("Error: malloc failed for new board inside new_board()\n");
+    }
+
     /* malloc height */
     newboard->matrix = (struct cell **)malloc(height * sizeof(struct cell *));
+    if(!newboard->matrix)
+    {
+        perror("Error: malloc failled when allocating for newboard->matrix\n");
+    }
     /* malloc width */
     for (i = 0; i < height; i++)
     {
         newboard->matrix[i] = (struct cell *)malloc(newboard->width * sizeof(struct cell));
+        if (!newboard->matrix[i])
+        {
+            perror("Error: malloc failed when allocating for new matrix cell\n");
+        }
     }
 
     for (i = 0; i < height; i++)
@@ -35,16 +48,6 @@ struct board *new_board(int width, int height)
             newboard->matrix[i][j].owner = NULL;
             newboard->matrix[i][j].letter = EOF;
         }
-    }
-
-    /* delete this */
-    for (i = 0; i < height; i++)
-    {
-        for (j = 0; j < width; j++)
-        {
-            printf("%d ", newboard->matrix[i][j].letter);
-        }
-        printf("\n");
     }
 
     return newboard;
