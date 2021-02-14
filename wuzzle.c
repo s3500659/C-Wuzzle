@@ -45,10 +45,6 @@ BOOLEAN read_scorelist(FILE *reader, char *array)
 
 int main(int argc, char *argv[])
 {
-    /* check the command line args and then pass the appropriate arg to
-     * play_game()
-     **/
-
     char scorelist[LINELEN + EXTRACHARS] = "";
     FILE *reader;
 

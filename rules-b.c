@@ -17,7 +17,7 @@
 BOOLEAN validate_move(struct player *theplayer, const char *word,
                       const struct coord *coords, enum orientation orient)
 {
-    BOOLEAN isFirstMove = TRUE;
+    static BOOLEAN isFirstMove = TRUE;
 
     if (make_move(isFirstMove, theplayer, word, coords, orient))
     {
@@ -53,7 +53,8 @@ BOOLEAN make_move(BOOLEAN isFirstMove, struct player *theplayer, const char *wor
 }
 
 /* place the letter horizontaly on the board and also decrease the letter count*/
-void place_letter_horiz(const char *word, struct player *theplayer, const struct coord *coords, BOOLEAN isfirstmove)
+void place_letter_horiz(const char *word, struct player *theplayer,
+                        const struct coord *coords, BOOLEAN isfirstmove)
 {
     int h;
     int i = 0;
@@ -75,11 +76,11 @@ void place_letter_horiz(const char *word, struct player *theplayer, const struct
     }
     else
     {
-        for (h = coords->x - 1; h < board->width; h++)
+        if (board->matrix[coords->y - 1][coords->x - 1].letter == *(word + i))
         {
-            if (has_letter(word, theplayer))
+            for (h = coords->x - 1; h < board->width; h++)
             {
-                if (board->matrix[coords->y - 1][h].letter == *(word + i))
+                if (has_letter(word, theplayer))
                 {
                     board->matrix[coords->y - 1][h].letter = *(word + i);
                     board->matrix[coords->y - 1][h].owner = theplayer;
@@ -88,6 +89,10 @@ void place_letter_horiz(const char *word, struct player *theplayer, const struct
                     i++;
                 }
             }
+        }
+        else
+        {
+            fprintf(stderr, "Error: that letter does not match the letter already on the board!\n");
         }
     }
 }
@@ -114,11 +119,11 @@ void place_letter_vert(const char *word, struct player *theplayer, const struct 
     }
     else
     {
-        for (v = coords->y - 1; v < board->width; v++)
+        if (board->matrix[coords->y - 1][coords->x - 1].letter == *(word + i))
         {
-            if (has_letter(word, theplayer))
+            for (v = coords->y - 1; v < board->width; v++)
             {
-                if (board->matrix[v][coords->x - 1].letter == *(word + i))
+                if (has_letter(word, theplayer))
                 {
                     board->matrix[v][coords->x - 1].letter = *(word + i);
                     board->matrix[v][coords->x - 1].owner = theplayer;
@@ -127,6 +132,10 @@ void place_letter_vert(const char *word, struct player *theplayer, const struct 
                     i++;
                 }
             }
+        }
+        else
+        {
+            fprintf(stderr, "Error: that letter does not match the letter already on the board!\n");
         }
     }
 }

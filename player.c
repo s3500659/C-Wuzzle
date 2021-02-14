@@ -264,7 +264,6 @@ void print_board(struct player *theplayer)
             }
             else
             {
-
                 printf("  %s%c%s  |", color_strings[theplayer->curgame->theboard->matrix[i][j].owner->color],
                        letter, color_strings[COL_RESET]);
             }

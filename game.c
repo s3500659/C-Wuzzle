@@ -151,9 +151,7 @@ void free_memory(struct player *p1, struct player *p2, struct game *thegame, str
     }
     free(thegame->theboard->matrix);
     free(p1->hand);
-    free(p1),
     free(p2->hand);
-    free(p2);
     free(scorelist);
     
 }
