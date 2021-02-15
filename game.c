@@ -9,13 +9,13 @@
 #include "rules-b.h"
 #include "score_list.h"
 #include "board.h"
-
+#include "word_list.h"
 
 /**
  * initialise the game. Please see the assignment specification for details of
  * what is required.
  **/
-BOOLEAN game_init(struct game *thegame)
+BOOLEAN game_init(struct game *thegame, const char *wordlist)
 {
     struct player playerone;
     struct player playertwo;
@@ -25,6 +25,12 @@ BOOLEAN game_init(struct game *thegame)
     int width, height;
     struct board *newboard = (struct board *)malloc(sizeof(struct board));
     int coinflip_result;
+    struct word_list *new_wordlist;
+
+    srand(time(NULL));
+
+    /* load wordlist */
+    new_wordlist = load_wordlist(wordlist);
 
     if (!newboard)
     {
@@ -65,12 +71,31 @@ BOOLEAN game_init(struct game *thegame)
     return TRUE;
 }
 
+#define WORDLISTLEN 65000
+#define WORD_DELIM "\n"
+/* load the word list into a linked list */
+struct word_list *load_wordlist(const char *wordlist)
+{
+    struct word_list *newlist = new_list();
+    char *copy_wordlist = strdup(wordlist);
+    char *token;
+
+    token = strtok(copy_wordlist, WORD_DELIM);
+    while (token != NULL)
+    {
+        list_add(newlist, token);
+
+        token = strtok(NULL, WORD_DELIM);
+    }
+
+    return newlist;
+}
+
 /* flips a coin, result should only be either 0 or 1 */
 int flip_coin()
 {
     int result = EOF;
 
-    srand(time(NULL));
     result = gen_randomnumber(COINFLIP);
     assert(result > EOF || result < COINFLIP);
 
@@ -84,7 +109,7 @@ int flip_coin()
  * it is and handle cleaning up and quitting the program when a player quits the
  * game.
  **/
-void play_game(const char *scoresfile)
+void play_game(const char *scoresfile, const char *wordlist)
 {
     struct game *thegame = malloc(sizeof(struct game));
     struct score_list *scorelist;
@@ -96,7 +121,7 @@ void play_game(const char *scoresfile)
         perror("Error: malloc failed when allocating for struct game inside play_game()\n");
     }
 
-    game_init(thegame);
+    game_init(thegame, wordlist);
     scorelist = load_scores(scoresfile);
 
     while (scorelist->total_count > 0)
@@ -121,7 +146,7 @@ void play_game(const char *scoresfile)
                 free_memory(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO], thegame, scorelist);
                 exit(EXIT_SUCCESS);
             }
-            
+
             currentplayer = PLAYERTWO;
         }
         /* player two's turn */
@@ -153,7 +178,6 @@ void free_memory(struct player *p1, struct player *p2, struct game *thegame, str
     free(p1->hand);
     free(p2->hand);
     free(scorelist);
-    
 }
 
 void declare_winner(struct player *p1, struct player *p2)
@@ -162,11 +186,11 @@ void declare_winner(struct player *p1, struct player *p2)
     {
         printf("%s is the winner with %d points!\n", p1->name, p1->score);
     }
-    else if(p1->score < p2->score)
+    else if (p1->score < p2->score)
     {
         printf("%s is the winner with %d points!\n", p2->name, p2->score);
     }
-    else 
+    else
     {
         printf("It's a draw!\n");
     }

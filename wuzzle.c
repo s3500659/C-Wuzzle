@@ -12,10 +12,13 @@
 #include "game.h"
 #include "shared.h"
 
-#define REQUIRED_ARGS 2
-#define FILEARG 1
+#define REQUIRED_ARGS 3
+#define SCORELIST_ARGS 1
+#define WORDLIST_ARGS 2
 #define LINELEN 300
 #define EXTRACHARS 2
+
+#define WORDLISTLEN 65000
 
 FILE *open_file(const char *fname)
 {
@@ -35,17 +38,29 @@ BOOLEAN read_scorelist(FILE *reader, char *array)
 
     assert(reader != NULL);
 
-    while (fgets(line, LINELEN + EXTRACHARS, reader) != NULL) {
-        
+    while (fgets(line, LINELEN + EXTRACHARS, reader) != NULL)
+    {
+
         strcat(array, line);
     }
 
     return TRUE;
 }
 
+void print_wordlist(char *list)
+{
+    int i;
+
+    for (i = 0; i < WORDLISTLEN; i++)
+    {
+        printf("%c", list[i]);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     char scorelist[LINELEN + EXTRACHARS] = "";
+    char wordlist[WORDLISTLEN] = "";
     FILE *reader;
 
     if (REQUIRED_ARGS != argc)
@@ -54,14 +69,13 @@ int main(int argc, char *argv[])
                         "You need to provide a filename to open!\n");
         return EXIT_FAILURE;
     }
-
-    reader = open_file(argv[FILEARG]);
-
+    /* read scorelist */
+    reader = open_file(argv[SCORELIST_ARGS]);
     if (!reader)
     {
+        perror("Error: problem reading scorelist\n");
         return EXIT_FAILURE;
     }
-
     if (!read_scorelist(reader, scorelist))
     {
         fclose(reader);
@@ -69,7 +83,21 @@ int main(int argc, char *argv[])
     }
     fclose(reader);
 
-    play_game(scorelist);
+    /* read wordlist */
+    reader = open_file(argv[WORDLIST_ARGS]);
+    if (!reader)
+    {
+        perror("Error: problem reading wordlist\n");
+        return EXIT_FAILURE;
+    }
+    if (!read_scorelist(reader, wordlist))
+    {
+        fclose(reader);
+        return EXIT_FAILURE;
+    }
+    fclose(reader);
+
+    play_game(scorelist, wordlist);
 
     return EXIT_SUCCESS;
 }

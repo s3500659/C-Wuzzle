@@ -168,7 +168,6 @@ void deal_letters(struct score_list *score_list,
 
     init_scorelist(player_hand);
     /* put 5 letters from score_list into player_hand */
-    srand(time(NULL));
     while (player_hand->total_count < MAXHAND)
     {
         int randomnumber = 0;
