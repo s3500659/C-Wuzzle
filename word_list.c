@@ -139,5 +139,17 @@ void list_free(struct word_list *thelist)
  **/
 BOOLEAN is_in_dictionary(struct word_list *thelist, const char *word)
 {
+    struct word_node *temp = thelist->head;
+    while (temp->next != NULL)
+    {
+        if(strcmp(temp->word, word) == 0)
+        {
+            printf("word exist in the dictionary!\n");
+            return TRUE;
+        }
+
+        temp = temp->next;
+    }
+
     return FALSE;
 }

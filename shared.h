@@ -9,7 +9,7 @@
 #include <time.h>
 
 #define BASE10 10
-#define MAXLETTER 5
+#define MAXLETTER 20
 #define MAXLOCATIONLEN 3
 #define ORIENTATIONLEN 1
 #define MAX_PLAYERS 2

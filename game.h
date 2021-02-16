@@ -24,7 +24,7 @@ struct game
     struct letter_list *score_list;
 };
 
-BOOLEAN game_init(struct game *, const char *);
+BOOLEAN game_init(struct game *);
 void play_game(const char *scoresfile, const char *wordlist);
 BOOLEAN get_board_size(int *width, int *height);
 int flip_coin();

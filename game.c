@@ -15,7 +15,7 @@
  * initialise the game. Please see the assignment specification for details of
  * what is required.
  **/
-BOOLEAN game_init(struct game *thegame, const char *wordlist)
+BOOLEAN game_init(struct game *thegame)
 {
     struct player playerone;
     struct player playertwo;
@@ -25,12 +25,9 @@ BOOLEAN game_init(struct game *thegame, const char *wordlist)
     int width, height;
     struct board *newboard = (struct board *)malloc(sizeof(struct board));
     int coinflip_result;
-    struct word_list *new_wordlist;
 
     srand(time(NULL));
 
-    /* load wordlist */
-    new_wordlist = load_wordlist(wordlist);
 
     if (!newboard)
     {
@@ -71,7 +68,6 @@ BOOLEAN game_init(struct game *thegame, const char *wordlist)
     return TRUE;
 }
 
-#define WORDLISTLEN 65000
 #define WORD_DELIM "\n"
 /* load the word list into a linked list */
 struct word_list *load_wordlist(const char *wordlist)
@@ -87,7 +83,7 @@ struct word_list *load_wordlist(const char *wordlist)
 
         token = strtok(NULL, WORD_DELIM);
     }
-
+    
     return newlist;
 }
 
@@ -115,13 +111,14 @@ void play_game(const char *scoresfile, const char *wordlist)
     struct score_list *scorelist;
     enum move_result moveresult;
     int currentplayer = thegame->curr_player_num;
+    struct word_list *word_list = load_wordlist(wordlist);
 
     if (!thegame)
     {
         perror("Error: malloc failed when allocating for struct game inside play_game()\n");
     }
 
-    game_init(thegame, wordlist);
+    game_init(thegame);
     scorelist = load_scores(scoresfile);
 
     while (scorelist->total_count > 0)
@@ -139,7 +136,7 @@ void play_game(const char *scoresfile, const char *wordlist)
         /* player one's turn */
         if (currentplayer == PLAYERONE)
         {
-            moveresult = player_turn(&thegame->players[PLAYERONE]);
+            moveresult = player_turn(&thegame->players[PLAYERONE], word_list);
             if (moveresult == MOVE_QUIT)
             {
                 declare_winner(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO]);
@@ -152,7 +149,7 @@ void play_game(const char *scoresfile, const char *wordlist)
         /* player two's turn */
         else
         {
-            moveresult = player_turn(&thegame->players[PLAYERTWO]);
+            moveresult = player_turn(&thegame->players[PLAYERTWO], word_list);
             if (moveresult == MOVE_QUIT)
             {
                 declare_winner(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO]);

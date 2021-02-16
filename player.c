@@ -5,6 +5,7 @@
  * Startup code provided by Paul Miller for use in "Programming in C",
  * Assignment 2, study period 4, 2020.
  *****************************************************************************/
+#include <ctype.h>
 #include "player.h"
 #include "rules-b.h"
 #include "game.h"
@@ -109,7 +110,7 @@ BOOLEAN validate_player_colour(struct player *p1, struct player *p2)
  * play a move for this player. please see the assignment specification for the
  * details of this.
  **/
-enum move_result player_turn(struct player *theplayer)
+enum move_result player_turn(struct player *theplayer, struct word_list *wordlist)
 {
     char new_word[MAXLETTER + EXTRACHARS] = "";
     char new_location[MAXLOCATIONLEN + EXTRACHARS] = "";
@@ -118,6 +119,8 @@ enum move_result player_turn(struct player *theplayer)
     struct coord *coords = malloc(sizeof(struct coord));
     enum orientation orient;
     char *token, *end;
+    int i = 0;
+    char chr;
 
     if (!coords)
     {
@@ -140,6 +143,26 @@ enum move_result player_turn(struct player *theplayer)
     {
         return MOVE_SKIP;
     }
+    /* convert word to uppercase */
+    while (new_word[i])
+    {
+        chr = toupper(new_word[i]);
+        new_word[i] = chr;
+        i++;
+    }
+
+    /* check for command */
+    if (is_command(new_word, wordlist))
+    {
+    }
+
+    /* check word exist in dictionary */
+    if (!is_in_dictionary(wordlist, new_word))
+    {
+        fprintf(stderr, "Error: the word does not exist in the dictionary!\n");
+        return MOVE_SKIP;
+    }
+
     /* get coordinates for the word */
     result = get_word_location(new_location);
     if (IR_EOF == result)
@@ -178,6 +201,75 @@ enum move_result player_turn(struct player *theplayer)
     validate_move(theplayer, new_word, coords, orient);
 
     return MOVE_SUCCESS;
+}
+
+#define COMMAND_DELIM ": "
+#define HELP_CMD "HELP"
+#define ADD_CMD "ADD"
+#define DEL_CMD "DELETE"
+#define SAVE_CMD "SAVE"
+BOOLEAN is_command(const char *command, struct word_list *wordlist)
+{
+    char *cmd = strdup(command);
+    char *token;
+    int i = 0;
+    BOOLEAN has_command = FALSE;
+
+    for (i = 0; i < strlen(command); i++)
+    {
+        if (*(command + i) == ':')
+        {
+            has_command = TRUE;
+        }
+    }
+    if (has_command)
+    {
+        token = strtok(cmd, COMMAND_DELIM);
+        while (token != NULL)
+        {
+            if (strcmp(token, HELP_CMD) == 0)
+            {
+                printf("Command: %s\n", token);
+                return TRUE;
+            }
+            if (strcmp(token, ADD_CMD) == 0)
+            {
+                token = strtok(NULL, COMMAND_DELIM);
+                /* check the args contain letters from the English alphabet */
+                i = 0;
+                while (token[i])
+                {
+                    if (isalpha(token[i]) == 0)
+                    {
+                        fprintf(stderr, "Error: You can only add words in the English alphabet!\n");
+                        return FALSE;
+                    }
+                    i++;
+                }
+                /* insert word into dictionary */
+                if (!list_add(wordlist, token))
+                {
+                    fprintf(stderr, "Error: failed adding word to dictionary inside is_command()\n");
+                    return FALSE;
+                }
+                printf("%s added to the dictionary!\n", token);
+                return TRUE;
+            }
+            if (strcmp(token, DEL_CMD) == 0)
+            {
+                printf("Command: %s\n", token);
+                return TRUE;
+            }
+            if (strcmp(token, SAVE_CMD) == 0)
+            {
+                printf("Command: %s\n", token);
+                return TRUE;
+            }
+            token = strtok(NULL, COMMAND_DELIM);
+        }
+    }
+
+    return FALSE;
 }
 
 /* get the orientation for the new word */
