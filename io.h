@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "shared.h"
+#include "word_list.h"
+
 
 #define EXTRACHARS 2
 #define BOARDSIZELEN 4
@@ -21,5 +23,5 @@ enum input_result
 enum input_result get_user_input(char *str, int buffer_len);
 BOOLEAN get_board_size(int *width, int *height);
 void clear_buffer(void);
-
+BOOLEAN save_to_file(struct word_list *thelist, const char *filename);
 #endif

@@ -107,7 +107,7 @@ BOOLEAN list_del(struct word_list *thelist, const char *data)
         return FALSE;
     }
 
-    else if (!prev)
+    if (!prev)
     {
         thelist->head = thelist->head->next;
     }
@@ -115,8 +115,8 @@ BOOLEAN list_del(struct word_list *thelist, const char *data)
     {
         prev->next = curr->next;
     }
-    free((char*)curr->word);
     free(curr);
+    thelist->num_words--;
     return TRUE;
 }
 

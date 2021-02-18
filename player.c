@@ -131,30 +131,30 @@ enum move_result player_turn(struct player *theplayer, struct word_list *wordlis
     printf("it is %s's turn and their colour is %s%s%s, and their score is %d.\n", theplayer->name,
            color_strings[theplayer->color], get_color_name(theplayer->color), color_strings[COL_RESET], theplayer->score);
     print_player_hand(theplayer);
-    /* end the game? */
-    printf("To end the game please input cltr+d\n");
-    /* get new word from player */
-    result = get_new_word(theplayer, new_word);
-    if (IR_EOF == result)
-    {
-        return MOVE_QUIT;
-    }
-    if (IR_FAILURE == result)
-    {
-        return MOVE_SKIP;
-    }
-    /* convert word to uppercase */
-    while (new_word[i])
-    {
-        chr = toupper(new_word[i]);
-        new_word[i] = chr;
-        i++;
-    }
 
-    /* check for command */
-    if (is_command(new_word, wordlist))
+    do
     {
-    }
+        /* end the game? */
+        printf("To end the game please input cltr+d\n");
+        /* get new word from player */
+        result = get_new_word(theplayer, new_word);
+        if (IR_EOF == result)
+        {
+            return MOVE_QUIT;
+        }
+        if (IR_FAILURE == result)
+        {
+            return MOVE_SKIP;
+        }
+        /* convert word to uppercase */
+        while (new_word[i])
+        {
+            chr = toupper(new_word[i]);
+            new_word[i] = chr;
+            i++;
+        }
+        i = 0;
+    } while (is_command(new_word, wordlist));
 
     /* check word exist in dictionary */
     if (!is_in_dictionary(wordlist, new_word))
@@ -203,11 +203,14 @@ enum move_result player_turn(struct player *theplayer, struct word_list *wordlis
     return MOVE_SUCCESS;
 }
 
-#define COMMAND_DELIM ": "
+#define CMD_TRIGGER ':'
+#define CMD_DELIM ": "
 #define HELP_CMD "HELP"
 #define ADD_CMD "ADD"
 #define DEL_CMD "DELETE"
 #define SAVE_CMD "SAVE"
+/* checks wether the input word contains a command, relating args. 
+If there is a valid command then the appropriate function will be executed */
 BOOLEAN is_command(const char *command, struct word_list *wordlist)
 {
     char *cmd = strdup(command);
@@ -217,14 +220,14 @@ BOOLEAN is_command(const char *command, struct word_list *wordlist)
 
     for (i = 0; i < strlen(command); i++)
     {
-        if (*(command + i) == ':')
+        if (*(command + i) == CMD_TRIGGER)
         {
             has_command = TRUE;
         }
     }
     if (has_command)
     {
-        token = strtok(cmd, COMMAND_DELIM);
+        token = strtok(cmd, CMD_DELIM);
         while (token != NULL)
         {
             if (strcmp(token, HELP_CMD) == 0)
@@ -234,7 +237,7 @@ BOOLEAN is_command(const char *command, struct word_list *wordlist)
             }
             if (strcmp(token, ADD_CMD) == 0)
             {
-                token = strtok(NULL, COMMAND_DELIM);
+                token = strtok(NULL, CMD_DELIM);
                 /* check the args contain letters from the English alphabet */
                 i = 0;
                 while (token[i])
@@ -252,25 +255,61 @@ BOOLEAN is_command(const char *command, struct word_list *wordlist)
                     fprintf(stderr, "Error: failed adding word to dictionary inside is_command()\n");
                     return FALSE;
                 }
-                printf("%s added to the dictionary!\n", token);
+                printf("'%s' added to the dictionary!\n", token);
                 return TRUE;
             }
             if (strcmp(token, DEL_CMD) == 0)
             {
-                printf("Command: %s\n", token);
+                token = strtok(NULL, CMD_DELIM);
+                /* check the args contain letters from the English alphabet */
+                i = 0;
+                while (token[i])
+                {
+                    if (isalpha(token[i]) == 0)
+                    {
+                        fprintf(stderr, "Error: You can only delete words in the English alphabet!\n");
+                        return FALSE;
+                    }
+                    i++;
+                }
+                /* delete word from dictionary */
+                if (!list_del(wordlist, token))
+                {
+                    fprintf(stderr, "Error: failed deleting word from dictionary inside is_command()\n");
+                    return FALSE;
+                }
+                printf("'%s' deleted from the dictionary!\n", token);
                 return TRUE;
             }
             if (strcmp(token, SAVE_CMD) == 0)
             {
-                printf("Command: %s\n", token);
+                token = strtok(NULL, CMD_DELIM);
+                /* check the args contain letters from the English alphabet */
+                i = 0;
+                while (token[i])
+                {
+                    if (isalpha(token[i]) == 0)
+                    {
+                        fprintf(stderr, "Error: Filename must only contain letters from the English alphabet!\n");
+                        return FALSE;
+                    }
+                    i++;
+                }
+                /* save linked list to file */
+                if (!save_to_file(wordlist, token))
+                {
+                    fprintf(stderr, "Error: saving to file has failed inside is_command()\n");
+                }
                 return TRUE;
             }
-            token = strtok(NULL, COMMAND_DELIM);
+            token = strtok(NULL, CMD_DELIM);
         }
     }
 
     return FALSE;
 }
+
+
 
 /* get the orientation for the new word */
 enum input_result get_orientation(char *ori)

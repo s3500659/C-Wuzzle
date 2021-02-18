@@ -1,5 +1,27 @@
 #include "io.h"
 
+/* save a linked list to disk with the specified filename */
+BOOLEAN save_to_file(struct word_list *thelist, const char *filename)
+{
+    FILE *fptr;
+    struct word_node *iterator = thelist->head;
+    fptr = fopen(filename, "w");
+
+    if (fptr == NULL)
+    {
+        fprintf(stderr, "Error: file pointer is NULL inside save_to_file()\n");
+        return FALSE;
+    }
+    while (iterator != NULL)
+    {
+        fprintf(fptr, "%s\n", iterator->word);
+        iterator = iterator->next;
+    }
+
+    fclose(fptr);
+    return TRUE;
+}
+
 /* get input for board size */
 BOOLEAN get_board_size(int *width, int *height)
 {
