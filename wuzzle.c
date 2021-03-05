@@ -11,6 +11,7 @@
 #include <assert.h>
 #include "game.h"
 #include "shared.h"
+#include <time.h>
 
 #define REQUIRED_ARGS 3
 #define SCORELIST_ARGS 1
@@ -18,7 +19,7 @@
 #define LINELEN 300
 #define EXTRACHARS 2
 
-#define WORDLISTLEN 65000
+#define WORDLISTLEN 460000
 
 FILE *open_file(const char *fname)
 {
@@ -63,12 +64,17 @@ int main(int argc, char *argv[])
     char wordlist[WORDLISTLEN] = "";
     FILE *reader;
 
+    clock_t start, end;
+    
+
     if (REQUIRED_ARGS != argc)
     {
         fprintf(stderr, "Error: invalid args provided. "
                         "You need to provide a filename to open!\n");
         return EXIT_FAILURE;
     }
+    
+    start = clock();
     /* read scorelist */
     reader = open_file(argv[SCORELIST_ARGS]);
     if (!reader)
@@ -82,7 +88,10 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
     fclose(reader);
+    end = clock();
+    printf("score_list took %f seconds to load.\n", ((double)(end - start)/CLOCKS_PER_SEC));
 
+    start = clock();
     /* read wordlist */
     reader = open_file(argv[WORDLIST_ARGS]);
     if (!reader)
@@ -96,6 +105,8 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
     fclose(reader);
+    end = clock();
+    printf("word_list took %f seconds to load.\n", ((double)(end - start)/CLOCKS_PER_SEC));
 
     play_game(scorelist, wordlist);
 

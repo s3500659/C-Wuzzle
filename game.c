@@ -10,6 +10,7 @@
 #include "score_list.h"
 #include "board.h"
 #include "word_list.h"
+#include "board.h"
 
 /**
  * initialise the game. Please see the assignment specification for details of
@@ -23,16 +24,10 @@ BOOLEAN game_init(struct game *thegame)
     char playertwo_name[NAMELEN + EXTRACHARS];
 
     int width, height;
-    struct board *newboard = (struct board *)malloc(sizeof(struct board));
+    struct board *newboard;
     int coinflip_result;
 
     srand(time(NULL));
-
-
-    if (!newboard)
-    {
-        perror("Error: malloc failed when allocating for new board inside game_init()\n");
-    }
 
     /* init player one */
     if (!player_init(&playerone, playerone_name, thegame))
@@ -83,7 +78,7 @@ struct word_list *load_wordlist(const char *wordlist)
 
         token = strtok(NULL, WORD_DELIM);
     }
-    
+
     return newlist;
 }
 
@@ -140,7 +135,7 @@ void play_game(const char *scoresfile, const char *wordlist)
             if (moveresult == MOVE_QUIT)
             {
                 declare_winner(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO]);
-                free_memory(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO], thegame, scorelist);
+                free_memory(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO], thegame, scorelist, word_list);
                 exit(EXIT_SUCCESS);
             }
 
@@ -153,7 +148,7 @@ void play_game(const char *scoresfile, const char *wordlist)
             if (moveresult == MOVE_QUIT)
             {
                 declare_winner(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO]);
-                free_memory(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO], thegame, scorelist);
+                free_memory(&thegame->players[PLAYERONE], &thegame->players[PLAYERTWO], thegame, scorelist, word_list);
                 exit(EXIT_SUCCESS);
             }
 
@@ -163,7 +158,7 @@ void play_game(const char *scoresfile, const char *wordlist)
 }
 
 /* free memory */
-void free_memory(struct player *p1, struct player *p2, struct game *thegame, struct score_list *scorelist)
+void free_memory(struct player *p1, struct player *p2, struct game *thegame, struct score_list *scorelist, struct word_list *wordlist)
 {
     int i;
 
@@ -172,6 +167,8 @@ void free_memory(struct player *p1, struct player *p2, struct game *thegame, str
         free(thegame->theboard->matrix[i]);
     }
     free(thegame->theboard->matrix);
+    free(thegame->theboard);
+    free(thegame);
     free(p1->hand);
     free(p2->hand);
     free(scorelist);

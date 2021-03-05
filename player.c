@@ -6,6 +6,7 @@
  * Assignment 2, study period 4, 2020.
  *****************************************************************************/
 #include <ctype.h>
+#include <time.h>
 #include "player.h"
 #include "rules-b.h"
 #include "game.h"
@@ -106,6 +107,7 @@ BOOLEAN validate_player_colour(struct player *p1, struct player *p2)
     return TRUE;
 }
 
+#define DEF_FILENAME "OUTPUT"
 /**
  * play a move for this player. please see the assignment specification for the
  * details of this.
@@ -140,6 +142,7 @@ enum move_result player_turn(struct player *theplayer, struct word_list *wordlis
         result = get_new_word(theplayer, new_word);
         if (IR_EOF == result)
         {
+            save_to_file(wordlist, DEF_FILENAME);
             return MOVE_QUIT;
         }
         if (IR_FAILURE == result)
@@ -167,6 +170,7 @@ enum move_result player_turn(struct player *theplayer, struct word_list *wordlis
     result = get_word_location(new_location);
     if (IR_EOF == result)
     {
+        save_to_file(wordlist, DEF_FILENAME);
         return MOVE_QUIT;
     }
     if (IR_FAILURE == result)
@@ -177,6 +181,7 @@ enum move_result player_turn(struct player *theplayer, struct word_list *wordlis
     result = get_orientation(new_orientation);
     if (IR_EOF == result)
     {
+        save_to_file(wordlist, DEF_FILENAME);
         return MOVE_QUIT;
     }
     if (IR_FAILURE == result)
@@ -217,6 +222,7 @@ BOOLEAN is_command(const char *command, struct word_list *wordlist)
     char *token;
     int i = 0;
     BOOLEAN has_command = FALSE;
+    clock_t start, end;
 
     for (i = 0; i < strlen(command); i++)
     {
@@ -232,11 +238,15 @@ BOOLEAN is_command(const char *command, struct word_list *wordlist)
         {
             if (strcmp(token, HELP_CMD) == 0)
             {
-                printf("Command: %s\n", token);
+                printf("==== Help Command ====\n"
+                       "Add: You can add a new word to the dictionary by using the add command (:add patatoes).\n"
+                       "Delete: You can delete a word from the dictionary by using the delete command (:delete potatoes)\n"
+                       "Save: You can save save the word dictionary to a file by using the save command (:save filename)\n");
                 return TRUE;
             }
             if (strcmp(token, ADD_CMD) == 0)
             {
+                start = clock();
                 token = strtok(NULL, CMD_DELIM);
                 /* check the args contain letters from the English alphabet */
                 i = 0;
@@ -256,10 +266,13 @@ BOOLEAN is_command(const char *command, struct word_list *wordlist)
                     return FALSE;
                 }
                 printf("'%s' added to the dictionary!\n", token);
+                end = clock();
+                printf("It took %f seconds to insert a new word into the dictionary\n", ((double)(end - start)/CLOCKS_PER_SEC));
                 return TRUE;
             }
             if (strcmp(token, DEL_CMD) == 0)
             {
+                start = clock();
                 token = strtok(NULL, CMD_DELIM);
                 /* check the args contain letters from the English alphabet */
                 i = 0;
@@ -279,10 +292,13 @@ BOOLEAN is_command(const char *command, struct word_list *wordlist)
                     return FALSE;
                 }
                 printf("'%s' deleted from the dictionary!\n", token);
+                end = clock();
+                printf("it took %f seconds to delete a word from the dictionary\n", ((double)(end - start)/CLOCKS_PER_SEC));
                 return TRUE;
             }
             if (strcmp(token, SAVE_CMD) == 0)
             {
+                start = clock();
                 token = strtok(NULL, CMD_DELIM);
                 /* check the args contain letters from the English alphabet */
                 i = 0;
@@ -300,9 +316,14 @@ BOOLEAN is_command(const char *command, struct word_list *wordlist)
                 {
                     fprintf(stderr, "Error: saving to file has failed inside is_command()\n");
                 }
+                end = clock();
+                printf("The word dictionary took %f seconds to save to file\n", ((double)(end - start)/CLOCKS_PER_SEC));
+                
                 return TRUE;
             }
             token = strtok(NULL, CMD_DELIM);
+            
+
         }
     }
 

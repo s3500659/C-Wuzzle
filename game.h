@@ -29,7 +29,7 @@ void play_game(const char *scoresfile, const char *wordlist);
 BOOLEAN get_board_size(int *width, int *height);
 int flip_coin();
 void declare_winner(struct player *p1, struct player *p2);
-void free_memory(struct player *p1, struct player *p2, struct game *thegame, struct score_list *scorelist);
+void free_memory(struct player *p1, struct player *p2, struct game *thegame, struct score_list *scorelist, struct word_list *wordlist);
 
 struct word_list *load_wordlist(const char *);
 
